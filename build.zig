@@ -22,8 +22,8 @@ pub fn build(b: *std.Build) void {
         .target = target,
         .version = .{
             .major = 1,
-            .minor = 28,
-            .patch = 2,
+            .minor = 30,
+            .patch = 0,
         },
         .optimize = optimize,
     });
@@ -32,7 +32,7 @@ pub fn build(b: *std.Build) void {
     if (optimize == .Debug or optimize == .ReleaseSafe)
         libasio.bundle_compiler_rt = true
     else
-        libasio.strip = true;
+        libasio.root_module.strip = true;
     libasio.addIncludePath(Path.relative("asio/include"));
     libasio.addCSourceFiles(.{
         .files = switch (ssl) {
@@ -46,20 +46,19 @@ pub fn build(b: *std.Build) void {
         .flags = cxxFlags,
     });
 
-    if (target.isWindows()) {
+    if (libasio.rootModuleTarget().os.tag == .windows) {
         if (libasio.linkage == .dynamic) {
-            // no pkg-config
             libasio.linkSystemLibrary("ws2_32");
             if (ssl) {
-                libasio.linkSystemLibraryName("crypto");
-                libasio.linkSystemLibraryName("ssl");
+                libasio.linkSystemLibrary("crypto");
+                libasio.linkSystemLibrary("ssl");
             }
             libasio.want_lto = false;
         }
     }
     // TODO: MSVC support libC++ (need: ucrt/msvcrt/vcruntime)
     // https://github.com/ziglang/zig/issues/4785 - drop replacement for MSVC
-    if (target.getAbi() == .msvc) {
+    if (libasio.rootModuleTarget().abi == .msvc) {
         libasio.linkLibC();
     } else {
         libasio.linkLibCpp(); // LLVM libc++ (builtin)
@@ -79,104 +78,154 @@ pub fn build(b: *std.Build) void {
         buildTest(b, .{
             .lib = libasio,
             .path = "asio/src/tests/unit/coroutine.cpp",
+            .optimize = optimize,
+            .target = target,
         });
         buildTest(b, .{
             .lib = libasio,
             .path = "asio/src/tests/unit/awaitable.cpp",
+            .optimize = optimize,
+            .target = target,
         });
         buildTest(b, .{
             .lib = libasio,
             .path = "asio/src/tests/unit/async_result.cpp",
+            .optimize = optimize,
+            .target = target,
         });
         buildTest(b, .{
             .lib = libasio,
             .path = "asio/src/tests/unit/associator.cpp",
+            .optimize = optimize,
+            .target = target,
         });
         buildTest(b, .{
             .lib = libasio,
             .path = "asio/src/tests/unit/co_spawn.cpp",
+            .optimize = optimize,
+            .target = target,
         });
         buildTest(b, .{
             .lib = libasio,
             .path = "asio/src/tests/unit/compose.cpp",
+            .optimize = optimize,
+            .target = target,
         });
         buildTest(b, .{
             .lib = libasio,
             .path = "asio/src/tests/unit/connect.cpp",
+            .optimize = optimize,
+            .target = target,
         });
         buildTest(b, .{
             .lib = libasio,
             .path = "asio/src/tests/unit/defer.cpp",
+            .optimize = optimize,
+            .target = target,
         });
         buildTest(b, .{
             .lib = libasio,
             .path = "asio/src/tests/unit/executor.cpp",
+            .optimize = optimize,
+            .target = target,
         });
         buildTest(b, .{
             .lib = libasio,
             .path = "asio/src/tests/unit/error.cpp",
+            .optimize = optimize,
+            .target = target,
         });
         buildTest(b, .{
             .lib = libasio,
             .path = "asio/src/tests/unit/strand.cpp",
+            .optimize = optimize,
+            .target = target,
         });
         buildTest(b, .{
             .lib = libasio,
             .path = "asio/src/tests/unit/thread_pool.cpp",
+            .optimize = optimize,
+            .target = target,
         });
         buildTest(b, .{
             .lib = libasio,
             .path = "asio/src/tests/unit/this_coro.cpp",
+            .optimize = optimize,
+            .target = target,
         });
         buildTest(b, .{
             .lib = libasio,
             .path = "asio/src/tests/unit/socket_base.cpp",
+            .optimize = optimize,
+            .target = target,
         });
         buildTest(b, .{
             .lib = libasio,
             .path = "asio/src/tests/unit/serial_port.cpp",
+            .optimize = optimize,
+            .target = target,
         });
         buildTest(b, .{
             .lib = libasio,
             .path = "asio/src/tests/unit/signal_set.cpp",
+            .optimize = optimize,
+            .target = target,
         });
         buildTest(b, .{
             .lib = libasio,
             .path = "asio/src/tests/unit/post.cpp",
+            .optimize = optimize,
+            .target = target,
         });
         buildTest(b, .{
             .lib = libasio,
             .path = "asio/src/tests/unit/prepend.cpp",
+            .optimize = optimize,
+            .target = target,
         });
         buildTest(b, .{
             .lib = libasio,
             .path = "asio/src/tests/unit/cancellation_type.cpp",
+            .optimize = optimize,
+            .target = target,
         });
         buildTest(b, .{
             .lib = libasio,
             .path = "asio/src/tests/unit/as_tuple.cpp",
+            .optimize = optimize,
+            .target = target,
         });
 
-        if (target.isWindows()) {
+        if (target.result.os.tag == .windows) {
             buildTest(b, .{
                 .lib = libasio,
                 .path = "asio/src/tests/unit/windows/object_handle.cpp",
+                .optimize = optimize,
+                .target = target,
             });
             buildTest(b, .{
                 .lib = libasio,
                 .path = "asio/src/tests/unit/windows/overlapped_handle.cpp",
+                .optimize = optimize,
+                .target = target,
             });
             buildTest(b, .{
                 .lib = libasio,
                 .path = "asio/src/tests/unit/windows/stream_handle.cpp",
+                .optimize = optimize,
+                .target = target,
             });
             buildTest(b, .{
                 .lib = libasio,
                 .path = "asio/src/tests/unit/windows/overlapped_ptr.cpp",
+                .optimize = optimize,
+                .target = target,
             });
             buildTest(b, .{
                 .lib = libasio,
                 .path = "asio/src/tests/unit/windows/random_access_handle.cpp",
+                .optimize = optimize,
+                .target = target,
             });
         }
     }
@@ -185,21 +234,21 @@ pub fn build(b: *std.Build) void {
 fn buildTest(b: *std.Build, info: BuildInfo) void {
     const test_exe = b.addExecutable(.{
         .name = info.filename(),
-        .optimize = info.lib.optimize,
-        .target = info.lib.target,
+        .optimize = info.optimize,
+        .target = info.target,
     });
-    if (info.lib.optimize == .Debug)
+    if (test_exe.root_module.optimize.? == .Debug)
         test_exe.defineCMacro("ASIO_ENABLE_HANDLER_TRACKING", null);
     test_exe.linkLibrary(info.lib);
-    for (info.lib.include_dirs.items) |include| {
-        test_exe.include_dirs.append(include) catch {};
+    for (info.lib.root_module.include_dirs.items) |include| {
+        test_exe.root_module.include_dirs.append(b.allocator, include) catch {};
     }
     test_exe.addIncludePath(Path.relative("asio/src/tests/unit")); // unit_test.hpp
     test_exe.addCSourceFile(.{ .file = .{ .path = info.path }, .flags = cxxFlags });
-    if (info.lib.target.isWindows()) {
+    if (test_exe.rootModuleTarget().os.tag == .windows) {
         test_exe.linkSystemLibrary("ws2_32");
     }
-    if (test_exe.target.getAbi() == .msvc)
+    if (test_exe.rootModuleTarget().abi == .msvc)
         test_exe.linkLibC()
     else
         test_exe.linkLibCpp();
@@ -227,7 +276,9 @@ const cxxFlags: []const []const u8 = &.{
 };
 
 const BuildInfo = struct {
-    lib: *std.Build.CompileStep,
+    optimize: std.builtin.OptimizeMode,
+    target: std.Build.ResolvedTarget,
+    lib: *std.Build.Step.Compile,
     path: []const u8,
 
     fn filename(self: BuildInfo) []const u8 {

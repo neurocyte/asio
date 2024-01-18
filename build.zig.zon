@@ -1,6 +1,11 @@
 .{
     .name = "libasio",
-    .version = "1.28.2",
-    .paths = .{""},
+    .version = "1.30.0",
     .minimum_zig_version = "0.12.0",
+    .paths = .{
+        "asio/asio",
+        "build.zig",
+        "LICENSE",
+        "README.md",
+    },
 }
