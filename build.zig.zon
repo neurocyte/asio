@@ -3,7 +3,8 @@
     .version = "1.30.0",
     .minimum_zig_version = "0.12.0",
     .paths = .{
-        "asio/asio",
+        "asio/include",
+        "asio/src",
         "build.zig",
         "LICENSE",
         "README.md",
