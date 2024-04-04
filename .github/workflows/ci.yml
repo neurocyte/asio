@@ -36,9 +36,9 @@ jobs:
         with:
           submodules: recursive
           fetch-depth: 0
-      - uses: goto-bus-stop/setup-zig@v2
+      - uses: korandoru/setup-zig@v1
         with:
-          version: master
+          zig-version: master
 
       - name: Build Summary ${{ matrix.targets }}
         run: zig build -DTests --summary all -freference-trace -Dtarget=${{ matrix.targets }}
