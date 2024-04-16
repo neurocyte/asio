@@ -2,7 +2,6 @@
 //! build: zig build -Doptimize=ReleaseFast -DShared (or -DShared=true/false)
 
 const std = @import("std");
-const Path = std.Build.LazyPath;
 
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
@@ -64,10 +63,7 @@ pub fn build(b: *std.Build) void {
         libasio.linkLibCpp(); // LLVM libc++ (builtin)
     }
     libasio.installHeadersDirectory(b.path("asio/include"), "", .{
-        .exclude_extensions = &.{
-            "am",
-            "gitignore",
-        },
+        .include_extensions = &.{ ".hpp", ".ipp" },
     });
     b.installArtifact(libasio);
 
