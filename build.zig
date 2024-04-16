@@ -23,7 +23,7 @@ pub fn build(b: *std.Build) void {
         .version = .{
             .major = 1,
             .minor = 30,
-            .patch = 1,
+            .patch = 2,
         },
         .optimize = optimize,
     });
@@ -33,7 +33,7 @@ pub fn build(b: *std.Build) void {
         libasio.bundle_compiler_rt = true
     else
         libasio.root_module.strip = true;
-    libasio.addIncludePath(Path.relative("asio/include"));
+    libasio.addIncludePath(b.path("asio/include"));
     libasio.addCSourceFiles(.{
         .files = switch (ssl) {
             true => &.{
@@ -63,10 +63,7 @@ pub fn build(b: *std.Build) void {
     } else {
         libasio.linkLibCpp(); // LLVM libc++ (builtin)
     }
-    libasio.installHeadersDirectoryOptions(.{
-        .source_dir = Path.relative("asio/include"),
-        .install_dir = .header,
-        .install_subdir = "",
+    libasio.installHeadersDirectory(b.path("asio/include"), "", .{
         .exclude_extensions = &.{
             "am",
             "gitignore",
@@ -243,7 +240,7 @@ fn buildTest(b: *std.Build, info: BuildInfo) void {
     for (info.lib.root_module.include_dirs.items) |include| {
         test_exe.root_module.include_dirs.append(b.allocator, include) catch {};
     }
-    test_exe.addIncludePath(Path.relative("asio/src/tests/unit")); // unit_test.hpp
+    test_exe.addIncludePath(b.path("asio/src/tests/unit")); // unit_test.hpp
     test_exe.addCSourceFile(.{ .file = .{ .path = info.path }, .flags = cxxFlags });
     if (test_exe.rootModuleTarget().os.tag == .windows) {
         test_exe.linkSystemLibrary("ws2_32");
