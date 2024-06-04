@@ -1,5 +1,5 @@
 /*.cpp
 /*.hpp
 /boost
-zig-cache/
-zig-out/
+/.zig-cache/
+/zig-out/

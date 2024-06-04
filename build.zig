@@ -237,7 +237,7 @@ fn buildTest(b: *std.Build, info: BuildInfo) void {
         test_exe.root_module.include_dirs.append(b.allocator, include) catch {};
     }
     test_exe.addIncludePath(b.path("asio/src/tests/unit")); // unit_test.hpp
-    test_exe.addCSourceFile(.{ .file = .{ .path = info.path }, .flags = cxxFlags });
+    test_exe.addCSourceFile(.{ .file = b.path(info.path), .flags = cxxFlags });
     if (test_exe.rootModuleTarget().os.tag == .windows) {
         test_exe.linkSystemLibrary("ws2_32");
     }
