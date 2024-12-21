@@ -26,8 +26,8 @@ pub fn build(b: *std.Build) void {
         },
         .optimize = optimize,
     });
-    libasio.defineCMacro("ASIO_STANDALONE", null);
-    libasio.defineCMacro("ASIO_SEPARATE_COMPILATION", null);
+    libasio.root_module.addCMacro("ASIO_STANDALONE", "1");
+    libasio.root_module.addCMacro("ASIO_SEPARATE_COMPILATION", "1");
     if (optimize == .Debug or optimize == .ReleaseSafe)
         libasio.bundle_compiler_rt = true
     else
@@ -231,7 +231,7 @@ fn buildTest(b: *std.Build, info: BuildInfo) void {
         .target = info.target,
     });
     if (test_exe.root_module.optimize.? == .Debug)
-        test_exe.defineCMacro("ASIO_ENABLE_HANDLER_TRACKING", null);
+        test_exe.root_module.addCMacro("ASIO_ENABLE_HANDLER_TRACKING", "1");
     test_exe.linkLibrary(info.lib);
     for (info.lib.root_module.include_dirs.items) |include| {
         test_exe.root_module.include_dirs.append(b.allocator, include) catch {};
