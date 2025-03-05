@@ -1,7 +1,8 @@
 .{
-    .name = "asio",
+    .name = .asio,
     .version = "1.30.2",
     .minimum_zig_version = "0.12.0",
+    .fingerprint = 0x9d5b35547743b8b4,
     .paths = .{
         "asio/include",
         "asio/src",
