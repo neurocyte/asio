@@ -12,19 +12,27 @@ pub fn build(b: *std.Build) void {
     const ssl = b.option(bool, "SSL", "Build Asio with OpenSSL support [default: false]") orelse false;
     const tests = b.option(bool, "Tests", "Build tests [default: false]") orelse false;
 
-    const libasio = if (!shared) b.addStaticLibrary(.{
+    const libasio = if (!shared) b.addLibrary(.{
         .name = "asio",
-        .target = target,
-        .optimize = optimize,
-    }) else b.addSharedLibrary(.{
+        .linkage = .static,
+        .root_module = b.createModule(.{
+            .target = target,
+            .optimize = optimize,
+            .link_libc = true,
+        }),
+    }) else b.addLibrary(.{
         .name = "asio",
-        .target = target,
+        .linkage = .dynamic,
         .version = .{
             .major = 1,
             .minor = 30,
             .patch = 2,
         },
-        .optimize = optimize,
+        .root_module = b.createModule(.{
+            .target = target,
+            .optimize = optimize,
+            .link_libc = true,
+        }),
     });
     libasio.root_module.addCMacro("ASIO_STANDALONE", "1");
     libasio.root_module.addCMacro("ASIO_SEPARATE_COMPILATION", "1");
