@@ -235,8 +235,10 @@ pub fn build(b: *std.Build) void {
 fn buildTest(b: *std.Build, info: BuildInfo) void {
     const test_exe = b.addExecutable(.{
         .name = info.filename(),
-        .optimize = info.optimize,
-        .target = info.target,
+        .root_module = b.createModule(.{
+            .target = info.target,
+            .optimize = info.optimize,
+        }),
     });
     if (test_exe.root_module.optimize.? == .Debug)
         test_exe.root_module.addCMacro("ASIO_ENABLE_HANDLER_TRACKING", "1");
