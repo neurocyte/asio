@@ -40,8 +40,8 @@ pub fn build(b: *std.Build) void {
         libasio.bundle_compiler_rt = true
     else
         libasio.root_module.strip = true;
-    libasio.addIncludePath(b.path("asio/include"));
-    libasio.addCSourceFiles(.{
+    libasio.root_module.addIncludePath(b.path("asio/include"));
+    libasio.root_module.addCSourceFiles(.{
         .files = switch (ssl) {
             true => &.{
                 "asio/src/asio_ssl.cpp",
@@ -55,20 +55,20 @@ pub fn build(b: *std.Build) void {
 
     if (libasio.rootModuleTarget().os.tag == .windows) {
         if (libasio.linkage == .dynamic) {
-            libasio.linkSystemLibrary("ws2_32");
+            libasio.root_module.linkSystemLibrary("ws2_32", .{});
             if (ssl) {
-                libasio.linkSystemLibrary("crypto");
-                libasio.linkSystemLibrary("ssl");
+                libasio.root_module.linkSystemLibrary("crypto", .{});
+                libasio.root_module.linkSystemLibrary("ssl", .{});
             }
-            libasio.want_lto = false;
+            libasio.lto = .thin;
         }
     }
     // TODO: MSVC support libC++ (need: ucrt/msvcrt/vcruntime)
     // https://github.com/ziglang/zig/issues/4785 - drop replacement for MSVC
     if (libasio.rootModuleTarget().abi == .msvc) {
-        libasio.linkLibC();
+        libasio.root_module.link_libc = true;
     } else {
-        libasio.linkLibCpp(); // LLVM libc++ (builtin)
+        libasio.root_module.link_libcpp = true; // LLVM libc++ (builtin)
     }
     libasio.installHeadersDirectory(b.path("asio/include"), "", .{
         .include_extensions = &.{ ".hpp", ".ipp" },
@@ -242,19 +242,20 @@ fn buildTest(b: *std.Build, info: BuildInfo) void {
     });
     if (test_exe.root_module.optimize.? == .Debug)
         test_exe.root_module.addCMacro("ASIO_ENABLE_HANDLER_TRACKING", "1");
-    test_exe.linkLibrary(info.lib);
+    test_exe.root_module.linkLibrary(info.lib);
     for (info.lib.root_module.include_dirs.items) |include| {
         test_exe.root_module.include_dirs.append(b.allocator, include) catch {};
     }
-    test_exe.addIncludePath(b.path("asio/src/tests/unit")); // unit_test.hpp
-    test_exe.addCSourceFile(.{ .file = b.path(info.path), .flags = cxxFlags });
+    test_exe.root_module.addIncludePath(b.path("asio/src/tests/unit")); // unit_test.hpp
+    test_exe.root_module.addCSourceFile(.{ .file = b.path(info.path), .flags = cxxFlags });
     if (test_exe.rootModuleTarget().os.tag == .windows) {
-        test_exe.linkSystemLibrary("ws2_32");
+        test_exe.root_module.linkSystemLibrary("ws2_32", .{});
     }
-    if (test_exe.rootModuleTarget().abi == .msvc)
-        test_exe.linkLibC()
-    else
-        test_exe.linkLibCpp();
+    if (test_exe.rootModuleTarget().abi == .msvc) {
+        test_exe.root_module.link_libc = true;
+    } else {
+        test_exe.root_module.link_libcpp = true;
+    }
     b.installArtifact(test_exe);
 
     const run_cmd = b.addRunArtifact(test_exe);
